@@ -4,7 +4,7 @@ from database.connection import query, execute
 class User:
     def __init__(self, row):
         self.id = row["id"]
-        self.name = row["nome"]
+        self.nome = row["nome"]
         self.email = row["email"]
         self.telefone = row["telefone"]
         self.senha_hash = row["senha_hash"]
@@ -34,12 +34,12 @@ class User:
     @staticmethod
     def buscar_por_email(email):
     
-        row = query("SELECT * FROM usuarios WHERE email = ?", (email,), one=True)
+        row = query("SELECT * FROM users WHERE email = ?", (email,), one=True)
         return User(row) if row else None
     
     @staticmethod
     def email_existe(email):
-        return User.buscar_por_email is not None
+        return User.buscar_por_email(email) is not None
     
     class AnonymousUser:
         id = None

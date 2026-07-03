@@ -1,14 +1,14 @@
 import os
 import sqlite3
 
-BASE_DIR = os.patch.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database", "mercado.db")
 SCHEMA_DB = os.path.join(BASE_DIR, "database", "schema.sql")
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    conn.execute = ("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 def init_db():
@@ -20,8 +20,8 @@ def init_db():
 
 def query(sql, params=(), one=False):
     conn = get_db()
-    cur = conn.executescript(sql, params)
-    rows = conn.fetchall()
+    cur = conn.execute(sql, params)
+    rows = cur.fetchall()
     conn.close()
     if one:
         return rows[0] if rows else None
@@ -29,8 +29,8 @@ def query(sql, params=(), one=False):
 
 def execute(sql, params=()):
     conn = get_db()
-    cur = conn.executescript(sql, params)
+    cur = conn.execute(sql, params)
     conn.commit()
-    last_id = conn.lastrowid
+    last_id = cur.lastrowid
     conn.close()
     return last_id
