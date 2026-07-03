@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar Produtos — Pastorão{% endblock %}
+
+{% block content %}
+<div class="container" style="padding:30px 0 70px;">
+    <h1>Painel administrativo</h1>
+
+    <div class="admin-shell">
+        <aside class="admin-side">
+            <span class="label">Visão geral</span>
+            <a href="/admin/dashboard">📊 Dashboard</a>
+            <span class="label">Gestão</span>
+            <a class="active" href="/admin/produtos">🥬 Produtos</a>
+            <a href="/admin/pedidos">📦 Pedidos</a>
+            <span class="label">Conta</span>
+            <a href="/conta">👤 Minha conta</a>
+        </aside>
+
+        <div>
+            <div class="table-toolbar">
+                <div class="search-box">
+                    <input type="text" data-table-search="tabela-produtos" placeholder="Buscar produto...">
+                    <span aria-hidden="true">🔎</span>
+                </div>
+                <a class="btn" href="/admin/produtos/novo">+ Novo produto</a>
+            </div>
+
+            {% if produtos %}
+            <div class="receipt">
+                <table class="receipt-table" id="tabela-produtos">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Categoria</th>
+                            <th>Preço</th>
+                            <th>Estoque</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produto in produtos %}
+                        <tr>
+                            <td>
+                                <div class="cell-product">
+                                    {% if produto.imagem %}<img src="{{ produto.imagem }}" alt="{{ produto.nome }}">{% endif %}
+                                    <span>{{ produto.nome }}</span>
+                                </div>
+                            </td>
+                            <td>{{ produto.categoria }}</td>
+                            <td class="cell-price">R$ {{ '%.2f'|format(produto.preco) }}</td>
+                            <td>
+                                <span class="stock-tag {{ 'low' if produto.estoque < 5 else '' }}">{{ produto.estoque }}</span>
+                            </td>
+                            <td style="display:flex;gap:8px;">
+                                <a class="action-icon edit" href="/admin/produtos/{{ produto.id }}/editar" aria-label="Editar">✏️</a>
+                                <form action="/admin/produtos/{{ produto.id }}/excluir" method="post" style="display:inline;">
+                                    <button class="action-icon delete" type="submit" data-confirm="Excluir o produto {{ produto.nome }}?" aria-label="Excluir">🗑️</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <span class="emoji">🥬</span>
+                <p>Nenhum produto cadastrado ainda.</p>
+                <a class="btn" href="/admin/produtos/novo" style="margin-top:14px;">Cadastrar primeiro produto</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

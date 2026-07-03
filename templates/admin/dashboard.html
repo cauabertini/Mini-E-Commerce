@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Painel — Pastorão{% endblock %}
+
+{% block content %}
+<div class="container" style="padding:30px 0 70px;">
+    <h1>Painel administrativo</h1>
+
+    <div class="admin-shell">
+        <aside class="admin-side">
+            <span class="label">Visão geral</span>
+            <a class="active" href="/admin/dashboard">📊 Dashboard</a>
+            <span class="label">Gestão</span>
+            <a href="/admin/produtos">🥬 Produtos</a>
+            <a href="/admin/pedidos">📦 Pedidos</a>
+            <span class="label">Conta</span>
+            <a href="/conta">👤 Minha conta</a>
+        </aside>
+
+        <div>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="label">Vendas hoje</span>
+                    <div class="value">R$ {{ '%.2f'|format(estatisticas.vendas_hoje) if estatisticas else '0,00' }}</div>
+                    <span class="delta">▲ {{ estatisticas.variacao_vendas if estatisticas else 0 }}% vs. ontem</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Pedidos pendentes</span>
+                    <div class="value">{{ estatisticas.pedidos_pendentes if estatisticas else 0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Produtos cadastrados</span>
+                    <div class="value">{{ estatisticas.total_produtos if estatisticas else 0 }}</div>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Estoque baixo</span>
+                    <div class="value">{{ estatisticas.estoque_baixo if estatisticas else 0 }}</div>
+                    <span class="delta down">⚠ atenção</span>
+                </div>
+            </div>
+
+            <div class="section-head">
+                <h2 class="mt-0">Últimos pedidos</h2>
+                <a class="btn btn-ghost" href="/admin/pedidos">Ver todos →</a>
+            </div>
+
+            {% if pedidos_recentes %}
+            <div class="receipt">
+                <table class="receipt-table">
+                    <thead>
+                        <tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos_recentes %}
+                        <tr>
+                            <td class="cell-price">#{{ pedido.id }}</td>
+                            <td>{{ pedido.cliente.nome }}</td>
+                            <td class="cell-price">R$ {{ '%.2f'|format(pedido.total) }}</td>
+                            <td><span class="status-pill {{ pedido.status|lower }}">{{ pedido.status }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <span class="emoji">📭</span>
+                <p>Nenhum pedido por aqui ainda.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

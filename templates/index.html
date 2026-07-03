@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Pastorão — Mercadinho de bairro com entrega{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+    <div class="container">
+        <div>
+            <h1>Tudo fresco.<br>Preço de bairro.</h1>
+            <p>O mercadinho que você já conhece da esquina, agora também no seu celular. Compre hoje, receba ainda hoje.</p>
+            <div class="hero-actions">
+                <a class="btn" href="/produtos">Ver produtos</a>
+                <a class="btn btn-outline" href="#categorias" style="color:var(--cream);border-color:var(--cream);">Categorias</a>
+            </div>
+        </div>
+        <div class="hero-art">
+            <div class="price-sticker">
+                <span class="hole" style="left:50%;transform:translateX(-50%);"></span>
+                <small>OFERTA</small>
+                <strong>R$ 0,99</strong>
+                <small>/ unidade</small>
+            </div>
+            <span class="hero-tag">🥖 pão fresquinho até as 7h</span>
+        </div>
+    </div>
+    <div class="zigzag zigzag--cream" aria-hidden="true"></div>
+</section>
+
+<section class="section" id="categorias">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Corredores</span>
+                <h2 class="mt-0">Compre por categoria</h2>
+            </div>
+        </div>
+        <div class="category-grid">
+            <a class="category-card" href="/produtos?categoria=hortifruti">
+                <span class="emoji">🥬</span>Hortifruti
+            </a>
+            <a class="category-card" href="/produtos?categoria=padaria">
+                <span class="emoji">🥖</span>Padaria
+            </a>
+            <a class="category-card" href="/produtos?categoria=acougue">
+                <span class="emoji">🥩</span>Açougue
+            </a>
+            <a class="category-card" href="/produtos?categoria=bebidas">
+                <span class="emoji">🧃</span>Bebidas
+            </a>
+            <a class="category-card" href="/produtos?categoria=limpeza">
+                <span class="emoji">🧼</span>Limpeza
+            </a>
+            <a class="category-card" href="/produtos?categoria=mercearia">
+                <span class="emoji">🥫</span>Mercearia
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="padding-top:0;">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Etiqueta amarela</span>
+                <h2 class="mt-0">Ofertas da semana</h2>
+            </div>
+            <a class="btn btn-ghost" href="/produtos">Ver tudo →</a>
+        </div>
+
+        {% if produtos_destaque %}
+        <div class="product-grid">
+            {% for produto in produtos_destaque %}
+            <article class="product-card">
+                {% if produto.desconto %}<span class="badge">-{{ produto.desconto }}%</span>{% endif %}
+                <a class="thumb" href="/produtos/{{ produto.id }}">
+                    {% if produto.imagem %}<img src="{{ produto.imagem }}" alt="{{ produto.nome }}">{% else %}🛒{% endif %}
+                </a>
+                <div class="body">
+                    <span class="cat">{{ produto.categoria }}</span>
+                    <h3><a href="/produtos/{{ produto.id }}">{{ produto.nome }}</a></h3>
+                    <p class="desc">{{ produto.descricao_curta or '' }}</p>
+                    <div class="price-row">
+                        <span class="price">R$ {{ '%.2f'|format(produto.preco) }}</span>
+                        <button class="btn btn-sm">Adicionar</button>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="emoji">🧺</span>
+            <p>As ofertas da semana ainda não foram cadastradas.<br>Volte em breve!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

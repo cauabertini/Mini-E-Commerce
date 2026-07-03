@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar Pedidos — Pastorão{% endblock %}
+
+{% block content %}
+<div class="container" style="padding:30px 0 70px;">
+    <h1>Painel administrativo</h1>
+
+    <div class="admin-shell">
+        <aside class="admin-side">
+            <span class="label">Visão geral</span>
+            <a href="/admin/dashboard">📊 Dashboard</a>
+            <span class="label">Gestão</span>
+            <a href="/admin/produtos">🥬 Produtos</a>
+            <a class="active" href="/admin/pedidos">📦 Pedidos</a>
+            <span class="label">Conta</span>
+            <a href="/conta">👤 Minha conta</a>
+        </aside>
+
+        <div>
+            <div class="table-toolbar">
+                <div class="search-box">
+                    <input type="text" data-table-search="tabela-pedidos" placeholder="Buscar por cliente ou nº do pedido...">
+                    <span aria-hidden="true">🔎</span>
+                </div>
+                <select class="search-box" style="min-width:160px;" onchange="window.location.href='/admin/pedidos?status='+this.value">
+                    <option value="">Todos os status</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="preparando">Preparando</option>
+                    <option value="enviado">Enviado</option>
+                    <option value="entregue">Entregue</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+            </div>
+
+            {% if pedidos %}
+            <div class="receipt">
+                <table class="receipt-table" id="tabela-pedidos">
+                    <thead>
+                        <tr>
+                            <th>Pedido</th>
+                            <th>Cliente</th>
+                            <th>Data</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        <tr>
+                            <td class="cell-price">#{{ pedido.id }}</td>
+                            <td>{{ pedido.cliente.nome }}</td>
+                            <td>{{ pedido.data.strftime('%d/%m/%Y') if pedido.data else '-' }}</td>
+                            <td class="cell-price">R$ {{ '%.2f'|format(pedido.total) }}</td>
+                            <td>
+                                <form action="/admin/pedidos/{{ pedido.id }}/status" method="post">
+                                    <select name="status" onchange="this.form.submit()" class="status-pill {{ pedido.status|lower }}" style="border:none;">
+                                        <option value="pendente" {{ 'selected' if pedido.status|lower == 'pendente' }}>Pendente</option>
+                                        <option value="preparando" {{ 'selected' if pedido.status|lower == 'preparando' }}>Preparando</option>
+                                        <option value="enviado" {{ 'selected' if pedido.status|lower == 'enviado' }}>Enviado</option>
+                                        <option value="entregue" {{ 'selected' if pedido.status|lower == 'entregue' }}>Entregue</option>
+                                        <option value="cancelado" {{ 'selected' if pedido.status|lower == 'cancelado' }}>Cancelado</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td><a class="btn btn-sm btn-outline" href="/pedidos/{{ pedido.id }}">Ver</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <span class="emoji">📭</span>
+                <p>Nenhum pedido encontrado.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

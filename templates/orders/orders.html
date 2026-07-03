@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Meus Pedidos — Pastorão{% endblock %}
+
+{% block content %}
+<div class="container" style="padding:30px 0 70px;">
+    <p class="breadcrumb"><a href="/">Início</a> / Meus Pedidos</p>
+    <h1>Meus pedidos</h1>
+
+    {% if pedidos %}
+    <div class="receipt">
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th>Pedido</th>
+                    <th>Data</th>
+                    <th>Itens</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                <tr>
+                    <td class="cell-price">#{{ pedido.id }}</td>
+                    <td>{{ pedido.data.strftime('%d/%m/%Y') if pedido.data else '-' }}</td>
+                    <td>{{ pedido.itens|length }} produto(s)</td>
+                    <td class="cell-price">R$ {{ '%.2f'|format(pedido.total) }}</td>
+                    <td><span class="status-pill {{ pedido.status|lower }}">{{ pedido.status }}</span></td>
+                    <td><a class="btn btn-sm btn-outline" href="/pedidos/{{ pedido.id }}">Ver detalhes</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <span class="emoji">📦</span>
+        <p>Você ainda não fez nenhum pedido.<br>Suas comprinhas vão aparecer por aqui.</p>
+        <a class="btn" href="/produtos" style="margin-top:14px;">Começar a comprar</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

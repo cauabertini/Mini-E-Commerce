@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Pedido #{{ pedido.id }} — Pastorão{% endblock %}
+
+{% block content %}
+<div class="container" style="padding:30px 0 70px;">
+    <p class="breadcrumb"><a href="/">Início</a> / <a href="/pedidos">Meus Pedidos</a> / Pedido #{{ pedido.id }}</p>
+
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Feito em {{ pedido.data.strftime('%d/%m/%Y às %H:%M') if pedido.data else '-' }}</span>
+            <h1 class="mt-0">Pedido #{{ pedido.id }}</h1>
+        </div>
+        <span class="status-pill {{ pedido.status|lower }}">{{ pedido.status }}</span>
+    </div>
+
+    <div class="cart-layout">
+        <div class="receipt">
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Preço</th>
+                        <th>Qtd.</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in pedido.itens %}
+                    <tr>
+                        <td>
+                            <div class="cell-product">
+                                {% if item.produto.imagem %}<img src="{{ item.produto.imagem }}" alt="{{ item.produto.nome }}">{% endif %}
+                                <span>{{ item.produto.nome }}</span>
+                            </div>
+                        </td>
+                        <td class="cell-price">R$ {{ '%.2f'|format(item.preco_unitario) }}</td>
+                        <td>{{ item.quantidade }}</td>
+                        <td class="cell-price">R$ {{ '%.2f'|format(item.preco_unitario * item.quantidade) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="cart-summary">
+            <h3 style="color:var(--cream);">Resumo</h3>
+            <div class="row"><span>Subtotal</span><span>R$ {{ '%.2f'|format(pedido.subtotal) }}</span></div>
+            <div class="row"><span>Entrega</span><span>R$ {{ '%.2f'|format(pedido.taxa_entrega) }}</span></div>
+            <div class="row total"><span>Total</span><span>R$ {{ '%.2f'|format(pedido.total) }}</span></div>
+            <hr style="border:none;border-top:1px dashed rgba(250,246,236,.25);margin:16px 0;">
+            <p style="color:#C7D4C5;font-size:.85rem;margin:0;">📍 {{ pedido.endereco_entrega or 'Endereço não informado' }}</p>
+        </div>
+    </div>
+
+    {% if pedido.status|lower != 'entregue' and pedido.status|lower != 'cancelado' %}
+    <form action="/pedidos/{{ pedido.id }}/cancelar" method="post" style="margin-top:20px;">
+        <button class="btn btn-outline" type="submit" data-confirm="Cancelar este pedido?">Cancelar pedido</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

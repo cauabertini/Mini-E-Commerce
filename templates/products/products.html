@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Produtos — Pastorão{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top:30px;">
+    <p class="breadcrumb"><a href="/">Início</a> / Produtos</p>
+
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">{{ produtos|length if produtos else 0 }} itens</span>
+            <h1 class="mt-0">Produtos</h1>
+        </div>
+        <form class="search-box" action="/produtos" method="get">
+            <input type="text" name="busca" placeholder="Buscar produto..." value="{{ request.args.get('busca', '') }}">
+            <button class="action-icon" type="submit" aria-label="Buscar">🔎</button>
+        </form>
+    </div>
+</div>
+
+<div class="container" style="display:grid;grid-template-columns:220px 1fr;gap:30px;padding-bottom:60px;">
+    <aside>
+        <div class="receipt" style="padding:18px;">
+            <h3 style="font-size:.95rem;">Categorias</h3>
+            <ul style="display:grid;gap:8px;margin-top:10px;">
+                <li><a href="/produtos">Todas</a></li>
+                <li><a href="/produtos?categoria=hortifruti">🥬 Hortifruti</a></li>
+                <li><a href="/produtos?categoria=padaria">🥖 Padaria</a></li>
+                <li><a href="/produtos?categoria=acougue">🥩 Açougue</a></li>
+                <li><a href="/produtos?categoria=bebidas">🧃 Bebidas</a></li>
+                <li><a href="/produtos?categoria=limpeza">🧼 Limpeza</a></li>
+                <li><a href="/produtos?categoria=mercearia">🥫 Mercearia</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <div>
+        {% if produtos %}
+        <div class="product-grid">
+            {% for produto in produtos %}
+            <article class="product-card">
+                {% if produto.desconto %}<span class="badge">-{{ produto.desconto }}%</span>{% endif %}
+                <a class="thumb" href="/produtos/{{ produto.id }}">
+                    {% if produto.imagem %}<img src="{{ produto.imagem }}" alt="{{ produto.nome }}">{% else %}🛒{% endif %}
+                </a>
+                <div class="body">
+                    <span class="cat">{{ produto.categoria }}</span>
+                    <h3><a href="/produtos/{{ produto.id }}">{{ produto.nome }}</a></h3>
+                    <p class="desc">{{ produto.descricao_curta or '' }}</p>
+                    <div class="price-row">
+                        <span class="price">R$ {{ '%.2f'|format(produto.preco) }}</span>
+                        {% if produto.estoque and produto.estoque > 0 %}
+                        <button class="btn btn-sm">Adicionar</button>
+                        {% else %}
+                        <button class="btn btn-sm" disabled>Esgotado</button>
+                        {% endif %}
+                    </div>
+                    {% if produto.estoque is defined %}
+                    <span class="stock-tag {{ 'low' if produto.estoque < 5 else '' }}">
+                        {{ produto.estoque }} em estoque
+                    </span>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="emoji">🔎</span>
+            <p>Nenhum produto encontrado.<br>Tente outra categoria ou termo de busca.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

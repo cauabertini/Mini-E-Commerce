@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Criar conta — Pastorão{% endblock %}
+
+{% block content %}
+<div class="container auth-shell">
+    <form class="card-form" method="post" action="/cadastro">
+        <span class="eyebrow">Primeira vez aqui?</span>
+        <h2 class="mt-0">Criar sua conta</h2>
+
+        <div class="field">
+            <label for="nome">Nome completo</label>
+            <input type="text" id="nome" name="nome" placeholder="Seu nome" required autofocus>
+        </div>
+
+        <div class="field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="voce@email.com" required>
+        </div>
+
+        <div class="field">
+            <label for="telefone">Telefone</label>
+            <input type="tel" id="telefone" name="telefone" placeholder="(11) 90000-0000">
+        </div>
+
+        <div class="field-row">
+            <div class="field">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" placeholder="••••••••" required minlength="6">
+            </div>
+            <div class="field">
+                <label for="confirmar_senha">Confirmar senha</label>
+                <input type="password" id="confirmar_senha" name="confirmar_senha" placeholder="••••••••" required minlength="6">
+            </div>
+        </div>
+        <p class="field-hint">Mínimo de 6 caracteres.</p>
+
+        <div class="checkbox-row">
+            <input type="checkbox" id="termos" name="termos" required>
+            <label for="termos" style="margin:0;text-transform:none;font-family:var(--font-body);">
+                Concordo com os termos de uso e a política de privacidade.
+            </label>
+        </div>
+
+        <button class="btn btn-block" type="submit">Criar conta</button>
+
+        <p class="form-footer">Já tem conta? <a href="/login" style="color:var(--tomato);font-weight:700;">Entrar</a></p>
+    </form>
+</div>
+{% endblock %}

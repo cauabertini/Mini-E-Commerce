@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Entrar — Pastorão{% endblock %}
+
+{% block content %}
+<div class="container auth-shell">
+    <form class="card-form" method="post" action="/login">
+        <span class="eyebrow">Bem-vindo de volta</span>
+        <h2 class="mt-0">Entrar na sua conta</h2>
+
+        <div class="field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="voce@email.com" required autofocus>
+        </div>
+
+        <div class="field">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" placeholder="••••••••" required>
+        </div>
+
+        <div class="checkbox-row" style="justify-content:space-between;">
+            <span style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="lembrar" name="lembrar">
+                <label for="lembrar" style="margin:0;text-transform:none;font-family:var(--font-body);">Lembrar de mim</label>
+            </span>
+            <a class="btn-ghost btn" style="padding:0;" href="/esqueci-senha">Esqueci a senha</a>
+        </div>
+
+        <button class="btn btn-block" type="submit">Entrar</button>
+
+        <p class="form-footer">Ainda não tem conta? <a href="/cadastro" style="color:var(--tomato);font-weight:700;">Cadastre-se</a></p>
+    </form>
+</div>
+{% endblock %}

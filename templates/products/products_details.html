@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ produto.nome }} — Pastorão{% endblock %}
+
+{% block content %}
+<div class="container" style="padding:30px 0 70px;">
+    <p class="breadcrumb">
+        <a href="/">Início</a> / <a href="/produtos">Produtos</a> / {{ produto.nome }}
+    </p>
+
+    <div class="product-detail">
+        <div class="gallery">
+            {% if produto.imagem %}<img src="{{ produto.imagem }}" alt="{{ produto.nome }}">{% else %}<span style="font-size:4rem;">🛒</span>{% endif %}
+        </div>
+
+        <div class="info">
+            <span class="cat">{{ produto.categoria }}</span>
+            <h1>{{ produto.nome }}</h1>
+            <p>{{ produto.descricao or 'Sem descrição cadastrada para este produto.' }}</p>
+
+            <div class="price-row" style="justify-content:flex-start;gap:14px;">
+                {% if produto.preco_antigo %}<span class="price old">R$ {{ '%.2f'|format(produto.preco_antigo) }}</span>{% endif %}
+                <span class="price-big">R$ {{ '%.2f'|format(produto.preco) }}</span>
+            </div>
+
+            {% if produto.estoque is defined %}
+            <span class="stock-tag {{ 'low' if produto.estoque < 5 else '' }}">
+                {{ produto.estoque }} unidades em estoque
+            </span>
+            {% endif %}
+
+            <form action="/carrinho/adicionar" method="post">
+                <input type="hidden" name="produto_id" value="{{ produto.id }}">
+                <div class="detail-actions">
+                    <div class="qty-stepper">
+                        <button type="button" class="qty-minus" aria-label="Diminuir">−</button>
+                        <input type="number" name="quantidade" value="1" min="1" max="{{ produto.estoque or 99 }}">
+                        <button type="button" class="qty-plus" aria-label="Aumentar">+</button>
+                    </div>
+                    <button class="btn" type="submit" {{ 'disabled' if produto.estoque is defined and produto.estoque == 0 else '' }}>
+                        Adicionar ao carrinho
+                    </button>
+                </div>
+            </form>
+
+            <div class="meta-list">
+                <span>SKU: {{ produto.id }}</span>
+                <span>Categoria: {{ produto.categoria }}</span>
+                {% if produto.peso %}<span>Peso/Volume: {{ produto.peso }}</span>{% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if produtos_relacionados %}
+    <div class="section" style="padding-bottom:0;">
+        <h2>Quem comprou, também levou</h2>
+        <div class="product-grid">
+            {% for relacionado in produtos_relacionados %}
+            <article class="product-card">
+                <a class="thumb" href="/produtos/{{ relacionado.id }}">
+                    {% if relacionado.imagem %}<img src="{{ relacionado.imagem }}" alt="{{ relacionado.nome }}">{% else %}🛒{% endif %}
+                </a>
+                <div class="body">
+                    <h3><a href="/produtos/{{ relacionado.id }}">{{ relacionado.nome }}</a></h3>
+                    <div class="price-row">
+                        <span class="price">R$ {{ '%.2f'|format(relacionado.preco) }}</span>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
