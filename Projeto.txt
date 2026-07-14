@@ -1,159 +1,214 @@
-1-Criar schema sql (FEITO ✅)
-2-Criar o connection.py (FEITO ✅)
+1- Criar schema sql (FEITO ✅)
+2- Criar o connection.py (FEITO ✅)
 3- Criar as configs e env (FEITO ✅)
-
-4- Criar o models:
-    Ordem:
-        User -> Product -> Cart -> Order
-    User:
-        Criar a classe user, funcao __init__
-User (models/user.py):
-
-Classe User com __init__ recebendo uma row do banco
-Property is_authenticated retornando True
-Método check_password(senha) usando check_password_hash
-Método estático criar(nome, email, senha, telefone, is_admin) gerando hash com generate_password_hash antes de salvar
-Método estático buscar_por_id(usuario_id)
-Método estático buscar_por_email(email)
-Método estático email_existe(email)
-Classe AnonymousUser com id=None, is_admin=False, is_authenticated=False
+4- Criar o models (FEITO ✅)
+5- Criar o services (FEITO ✅) 
 
 
-5. models/product.py:
+8. app.py
+Função create_app():
 
-Classe Product só com métodos estáticos
-listar(categoria, busca) montando query dinâmica com WHERE 1=1
-destaques(limite) filtrando por destaque = 1
-buscar_por_id(produto_id)
-relacionados(categoria, excluir_id, limite) com ORDER BY RANDOM()
-criar(dados) recebendo dicionário
-atualizar(produto_id, dados)
-excluir(produto_id)
-baixar_estoque(produto_id, quantidade) com UPDATE ... SET estoque = estoque - ?
-contar_estoque_baixo(limite) para o dashboard
-contar_total() para o dashboard
+Instancia Flask(__name__)
+- Carrega configurações com app.config.from_object(Config)
+Registra os 5 blueprints: auth_bp, products_bp, cart_bp, orders_bp, admin_bp
 
 
-6. models/cart.py:
+@app.before_request — carregar_usuario_atual():
 
-Classe Cart só com métodos estáticos
-listar_itens(usuario_id) buscando cada produto via Product.buscar_por_id e montando lista de dicionários com {id, produto_id, quantidade, produto}
-contar_itens(usuario_id) com SUM(quantidade) para o badge do menu
-buscar_item(item_id, usuario_id) filtrando pelos dois ids para segurança
-adicionar(usuario_id, produto_id, quantidade) verificando se já existe e somando quantidade se sim
-atualizar_quantidade(item_id, usuario_id, quantidade) chamando remover se quantidade <= 0
-remover(item_id, usuario_id)
-limpar(usuario_id) deletando todos os itens do usuário
-calcular_totais(itens, taxa_entrega, frete_gratis_acima_de) retornando tupla (subtotal, entrega, total)
+Lê session.get("usuario_id")
+Se existir, chama User.buscar_por_id() e atribui a g.usuario_atual
+Se não existir, atribui AnonymousUser() a g.usuario_atual
 
 
-7. models/order.py:
+@app.context_processor — injetar_contexto_global():
 
-Função auxiliar _parse_data(valor) convertendo string do SQLite em datetime
-Classe Order só com métodos estáticos
-Método privado _montar(pedido_row, com_cliente) buscando pedido_itens, o produto de cada item e opcionalmente o cliente, retornando dicionário completo
-criar(usuario_id, itens_carrinho, subtotal, taxa_entrega, total, endereco) inserindo em pedidos, depois em pedido_itens congelando o preço, depois chamando Product.baixar_estoque
-listar_por_usuario(usuario_id) ordenado por data DESC
-listar_todos(status) com filtro opcional, incluindo cliente
-listar_recentes(limite) para o dashboard
-buscar_por_id(pedido_id, usuario_id) com usuario_id opcional para segurança
-atualizar_status(pedido_id, status)
-cancelar(pedido_id, usuario_id)
-contar_pendentes() para o dashboard
-vendas_de_hoje() ignorando cancelados
+Se g.usuario_atual.is_authenticated, chama Cart.contar_itens() para o badge do menu
+Retorna dicionário {"current_user": g.usuario_atual, "cart_count": cart_count} — disponível em todos os templates automaticamente
 
 
-8. services/auth_services.py:
+Rota "/" — home():
 
-Classe AuthError(Exception)
-registrar_usuario(nome, email, senha, confirmar_senha, telefone) validando campos obrigatórios, tamanho mínimo da senha, senhas iguais e email duplicado, depois chamando User.criar
-autenticar_usuario(email, senha) buscando por email e verificando hash, com mensagem de erro genérica para não vazar se o email existe
-
-
-9. services/cart_services.py:
-
-Classe CartError(Exception)
-adicionar_ao_carrinho(usuario_id, produto_id, quantidade) verificando se produto existe e tem estoque
-atualizar_item(item_id, usuario_id, quantidade) verificando se o item pertence ao usuário
-remover_item(item_id, usuario_id)
-obter_resumo(usuario_id) lendo TAXA_ENTREGA e FRETE_GRATIS_ACIMA_DE do current_app.config e retornando (itens, subtotal, entrega, total)
+Chama Product.destaques(8)
+Renderiza index.html passando produtos_destaque
 
 
-10. services/order_services.py:
+Bloco with app.app_context():
 
-Classe OrderError(Exception)
-finalizar_compra(usuario_id, endereco_entrega) verificando carrinho não vazio, estoque suficiente de cada item, calculando totais, chamando Order.criar e depois Cart.limpar
-cancelar_pedido(pedido_id, usuario_id) bloqueando se status for entregue ou cancelado
-atualizar_status_pedido(pedido_id, status) validando contra conjunto de status válidos antes de salvar
-
-
-11. app.py:
-
-Função create_app() instanciando Flask, carregando Config, registrando os 5 blueprints
-before_request carregando g.usuario_atual da sessão (ou AnonymousUser)
-context_processor injetando current_user e cart_count em todos os templates
-Rota / chamando Product.destaques(8) e renderizando index.html
-Bloco with app.app_context() chamando init_db(), criando admin padrão se não existir e chamando _seed_produtos_demo()
-Função _seed_produtos_demo() verificando Product.contar_total() > 0 antes de inserir
+Chama init_db() para garantir que as tabelas existam
+Checa User.email_existe("admin@pastorao.com.br"), se não existir chama User.criar() com is_admin=True
+    - Chama _seed_produtos_demo()
 
 
-12. routes/auth_routes.py:
+Função _seed_produtos_demo():
 
-Blueprint auth_bp
-Rota /cadastro GET/POST — no POST chama registrar_usuario, salva session["usuario_id"] e redireciona
-Rota /login GET/POST — no POST chama autenticar_usuario, salva sessão e redireciona para dashboard se admin ou home se cliente
-Rota /logout limpando session e redirecionando
-
-
-13. routes/products_routes.py:
-
-Blueprint products_bp
-Rota /produtos lendo categoria e busca de request.args
-Rota /produtos/<int:produto_id> com abort(404) se não encontrar, passando produtos_relacionados
+Checa Product.contar_total() > 0 e retorna imediatamente se já houver produtos
+Define lista de dicionários com produtos de demonstração (um por categoria)
+ - Percorre a lista chamando Product.criar() para cada um
 
 
-14. routes/cart_routes.py:
+Variável app = create_app() no nível do módulo
+Bloco if __name__ == "__main__" chamando app.run(debug=True)
+9. routes/auth_routes.py
+auth_bp = Blueprint("auth", __name__)
+Rota "/cadastro" GET/POST:
 
-Blueprint cart_bp
-Função auxiliar _login_obrigatorio() checando g.usuario_atual.is_authenticated
-Rota /carrinho GET
-Rota /carrinho/adicionar POST
-Rota /carrinho/atualizar POST
-Rota /carrinho/remover POST
-Rota /checkout GET/POST — finaliza a compra e redireciona para detalhes do pedido
-
-
-15. routes/order_routes.py:
-
-Blueprint orders_bp
-Função auxiliar _login_obrigatorio()
-Rota /pedidos listando por usuário
-Rota /pedidos/<int:pedido_id> com abort(404) se não encontrar ou não pertencer ao usuário
-Rota /pedidos/<int:pedido_id>/cancelar POST
+GET: renderiza auth/register.html
+- POST: lê nome, email, telefone, senha, confirmar_senha de request.form; chama registrar_usuario(); em caso de sucesso salva session["usuario_id"], chama flash() e redireciona para "home"; em caso de AuthError chama flash() com a mensagem de erro e re-renderiza o formulário
 
 
-16. routes/admin_routes.py:
+Rota "/login" GET/POST:
+   - GET: renderiza auth/login.html
 
-Blueprint admin_bp com url_prefix="/admin"
-before_request verificando is_authenticated e is_admin, com abort(403) se não for admin
-Rota /dashboard
-Rotas /produtos, /produtos/novo, /produtos/<id>/editar, /produtos/<id>/excluir
-Rotas /pedidos, /pedidos/<id>/status
-Função auxiliar _dados_produto_do_form() fazendo as conversões de tipo dos campos do formulário
+POST: lê email e senha de request.form; chama autenticar_usuario(); em caso de sucesso salva session["usuario_id"] e redireciona para "admin.dashboard" se usuario.is_admin ou "home" se não for; em caso de AuthError re-renderiza com flash
 
 
-17. templates/ — nessa ordem:
+Rota "/logout":
 
-base.html com header, nav, flash messages, bloco content e footer
-index.html com hero, categorias e vitrine de destaques
-auth/login.html e auth/register.html
-products/products.html, products/products_details.html, products/add_product.html (modo cadastro e edição no mesmo arquivo)
-cart/cart.html
-orders/orders.html e orders/orders_details.html
-admin/dashboard.html, admin/products.html, admin/orders.html
+Remove "usuario_id" da sessão com session.pop()
+Chama flash() e redireciona para "home"
 
 
-18. static/css/style.css e static/js/script.js
+10. routes/products_routes.py
+products_bp = Blueprint("products", __name__)
+Rota "/produtos":
 
-CSS: variáveis de cor, reset, componentes (cards, botões, tabelas, badges de status, stepper de quantidade)
-JS: toggle do menu mobile, confirmação antes de deletar (data-confirm), busca em tempo real nas tabelas do admin, stepper de quantidade (qty-plus/qty-minus)
+Lê categoria e busca de request.args.get()— ambos opcionais, ficam None se não informados
+Chama Product.listar(categoria=categoria, busca=busca)
+Renderiza products/products.html passando produtos
+
+
+Rota "/produtos/<int:produto_id>":
+
+Chama Product.buscar_por_id(produto_id), chama abort(404) se retornar None
+  - Chama Product.relacionados(produto["categoria"], produto_id) para sugestões
+Renderiza products/products_details.html passando produto e produtos_relacionados
+
+
+11. routes/cart_routes.py
+cart_bp = Blueprint("cart", __name__)
+Função _login_obrigatorio():
+
+Checa g.usuario_atual.is_authenticated
+Se não estiver logado, chama flash() e retorna redirect(url_for("auth.login"))
+Se estiver logado, retorna None — as rotas checam o retorno antes de continuar
+
+
+Rota "/carrinho" GET:
+ - Chama _login_obrigatorio()
+
+Chama obter_resumo(g.usuario_atual.id)
+Renderiza cart/cart.html passando itens_carrinho, subtotal, taxa_entrega, total
+
+
+Rota "/carrinho/adicionar" POST:
+
+Chama _login_obrigatorio()
+Lê produto_id e quantidade de request.form
+Chama adicionar_ao_carrinho(), captura CartError com flash
+Redireciona para "cart.ver_carrinho"
+
+
+Rota "/carrinho/atualizar" POST:
+
+Chama _login_obrigatorio()
+Lê item_id e quantidade de request.form
+Chama atualizar_item(), captura CartError com flash
+Redireciona para "cart.ver_carrinho"
+
+
+Rota "/carrinho/remover" POST:
+
+Chama _login_obrigatorio()
+Lê item_id de request.form
+Chama remover_item()
+Flash de confirmação e redireciona para "cart.ver_carrinho"
+
+
+Rota "/checkout" GET/POST:
+
+Chama _login_obrigatorio()
+Lê endereco_entrega de request.form se for POST, senão None
+Chama finalizar_compra(), captura OrderError redirecionando para o carrinho com flash
+Em caso de sucesso redireciona para "orders.detalhes" passando o pedido_id
+
+
+12. routes/order_routes.py
+orders_bp = Blueprint("orders", __name__)
+Função _login_obrigatorio() — idêntica à do cart_routes.py
+Rota "/pedidos":
+
+Chama Order.listar_por_usuario(g.usuario_atual.id)
+Renderiza orders/orders.html passando pedidos
+
+
+Rota "/pedidos/<int:pedido_id>":
+ - Chama Order.buscar_por_id(pedido_id, g.usuario_atual.id) — passa o usuario_id para impedir acesso a pedidos de outros usuários
+
+abort(404) se retornar None
+Renderiza orders/orders_details.html passando pedido
+
+
+Rota "/pedidos/<int:pedido_id>/cancelar" POST:
+
+Chama cancelar_pedido(), captura OrderError com flash
+Redireciona para "orders.detalhes" do mesmo pedido
+
+
+13. routes/admin_routes.py
+admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+@admin_bp.before_request — exigir_admin():
+
+Se não estiver logado: flash e redireciona para login
+   - Se estiver logado mas is_admin for False: abort(403)
+Esse decorator protege todas as rotas do blueprint de uma vez
+
+
+Rota "/dashboard":
+
+Monta dicionário estatisticas com Order.vendas_de_hoje(), Order.contar_pendentes(), Product.contar_total(), Product.contar_estoque_baixo()
+Chama Order.listar_recentes(5)
+Renderiza admin/dashboard.html
+
+
+Rota "/produtos":
+
+Chama Product.listar() sem filtros
+Renderiza admin/products.html
+
+
+Rota "/produtos/novo" GET/POST:
+
+GET: renderiza products/add_product.html passando produto=None — o template usa isso para saber que está no modo cadastro
+POST: chama _dados_produto_do_form(), depois Product.criar(), flash e redireciona
+
+
+Rota "/produtos/<int:produto_id>/editar" GET/POST:
+
+Busca o produto, abort(404) se não existir
+GET: renderiza products/add_product.html passando o produto — template preenche os campos automaticamente
+    - POST: chama _dados_produto_do_form(), depois Product.atualizar(), flash e redireciona
+
+
+Rota "/produtos/<int:produto_id>/excluir" POST:
+
+Chama Product.excluir(), flash e redireciona para "admin.produtos"
+
+
+Rota "/pedidos":
+    - Lê status de request.args.get() — filtro opcional
+   - Chama Order.listar_todos(status=status)
+- Renderiza admin/orders.html
+Rota "/pedidos/<int:pedido_id>/status" POST:
+
+Lê status de request.form
+Chama atualizar_status_pedido(), captura OrderError com flash
+Redireciona para "admin.pedidos"
+
+
+Função _dados_produto_do_form():
+    - Lê todos os campos do formulário de produto com request.form.get()
+- Converte preco para float, estoque e desconto para int
+
+Trata campos opcionais (preco_antigo, peso, imagem, etc.) retornando None se vazios
+destaque vira bool checando se o campo checkbox veio no form
+Retorna dicionário pronto para passar ao Product.criar() ou Product.atualizar()

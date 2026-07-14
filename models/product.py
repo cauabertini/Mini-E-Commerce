@@ -1,17 +1,30 @@
 from database.connection import query, execute
 
 class Product:
+    def __init__(self, row):
+        self.nome = row["nome"]
+        self.categoria = row["categoria"]
+        self.preco = row["preco"]
+        self.preco_antigo = row["preco_antigo"]
+        self.estoque = row["estoque"]
+        self.peso = row["peso"]
+        self.imagem = row["imagem"]
+        self.descricao = row["descricao"]
+        self.descicao_curta = row["descricao_curta"]
+        self.destaque = row["destaque"]
+        self.criado_em = row["criado_em"]
+    
     @staticmethod
     def listar(categoria=None, busca=None):
         sql="SELECT * FROM produtos WHERE 1=1"
         params=[]
         if categoria:
-            sql += "AND categoria = ?"
+            sql += " AND categoria = ?"
             params.append(categoria)
         if busca:
-            sql+= "AND nome LIKE ?"
+            sql+= " AND nome LIKE ?"
             params.append(f"%{busca}%")
-        sql += "ORDER BY nome ASC"
+        sql += " ORDER BY nome ASC"
         return query(sql, tuple(params))
 
     @staticmethod
@@ -56,14 +69,14 @@ class Product:
     
     @staticmethod
     def baixar_estoque(produto_id, quantidade):
-        return execute("UPDATE produtos SET estoque = ? WHERE id = ?",(produto_id, quantidade),)
+        return execute("UPDATE produtos SET estoque = estoque - ? WHERE id = ?",(produto_id, quantidade),)
     
     @staticmethod
     def contar_abaixo_estoque(limite=5):
-        row = query("SELECT COUNT(*) as total FROM pedidos WHERE estoque < ?",(limite,), one=True)
+        row = query("SELECT COUNT(*) as total FROM produtos WHERE estoque < ?",(limite,), one=True)
         return row["total"] if row else 0
     
     @staticmethod
     def contar_total():
-        row = query("SELECT COUNT(*) as total FROM PEDIDOS", one=True)
+        row = query("SELECT COUNT(*) as total FROM produtos", one=True)
         return row["total"] if row else 0
