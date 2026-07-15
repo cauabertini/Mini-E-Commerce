@@ -3,52 +3,8 @@
 3- Criar as configs e env (FEITO ✅)
 4- Criar o models (FEITO ✅)
 5- Criar o services (FEITO ✅) 
-
-
-8. app.py
-Função create_app():
-
-Instancia Flask(__name__)
-- Carrega configurações com app.config.from_object(Config)
-Registra os 5 blueprints: auth_bp, products_bp, cart_bp, orders_bp, admin_bp
-
-
-@app.before_request — carregar_usuario_atual():
-
-Lê session.get("usuario_id")
-Se existir, chama User.buscar_por_id() e atribui a g.usuario_atual
-Se não existir, atribui AnonymousUser() a g.usuario_atual
-
-
-@app.context_processor — injetar_contexto_global():
-
-Se g.usuario_atual.is_authenticated, chama Cart.contar_itens() para o badge do menu
-Retorna dicionário {"current_user": g.usuario_atual, "cart_count": cart_count} — disponível em todos os templates automaticamente
-
-
-Rota "/" — home():
-
-Chama Product.destaques(8)
-Renderiza index.html passando produtos_destaque
-
-
-Bloco with app.app_context():
-
-Chama init_db() para garantir que as tabelas existam
-Checa User.email_existe("admin@pastorao.com.br"), se não existir chama User.criar() com is_admin=True
-    - Chama _seed_produtos_demo()
-
-
-Função _seed_produtos_demo():
-
-Checa Product.contar_total() > 0 e retorna imediatamente se já houver produtos
-Define lista de dicionários com produtos de demonstração (um por categoria)
- - Percorre a lista chamando Product.criar() para cada um
-
-
-Variável app = create_app() no nível do módulo
-Bloco if __name__ == "__main__" chamando app.run(debug=True)
-9. routes/auth_routes.py
+6- Criar o app.py (FEITO ✅)
+7- Criar o routes/auth_routes.py
 auth_bp = Blueprint("auth", __name__)
 Rota "/cadastro" GET/POST:
 

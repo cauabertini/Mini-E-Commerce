@@ -41,8 +41,8 @@ class User:
     def email_existe(email):
         return User.buscar_por_email(email) is not None
     
-    class AnonymousUser:
-        id = None
-        nome = "Visitante"
-        is_admin = False
-        is_authenticated = False
+class AnonymousUser:
+    id = None
+    nome = "Visitante"
+    is_admin = False
+    is_authenticated = False
