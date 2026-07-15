@@ -37,10 +37,10 @@ class Product:
     
     @staticmethod
     def relacionados(categoria, excluir_id, limite=4):
-        return query("""SELECT * FROM pedidos
+        return query("""SELECT * FROM produtos
                      WHERE categoria = ? AND id != ?
                      ORDER BY RANDOM() LIMIT ?""",
-                     (categoria, excluir_id, limite),)
+                     (categoria, excluir_id, limite,))
     
     @staticmethod
     def criar(dados):
@@ -69,7 +69,7 @@ class Product:
     
     @staticmethod
     def baixar_estoque(produto_id, quantidade):
-        return execute("UPDATE produtos SET estoque = estoque - ? WHERE id = ?",(produto_id, quantidade),)
+        return execute("UPDATE produtos SET estoque = estoque - ? WHERE id = ?",(quantidade, produto_id),)
     
     @staticmethod
     def contar_abaixo_estoque(limite=5):

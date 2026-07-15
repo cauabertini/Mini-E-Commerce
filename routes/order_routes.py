@@ -26,7 +26,7 @@ def detalhes(pedido_id):
     pedido = Order.buscar_por_id(pedido_id, g.user_atual.id)
     if not pedido:
         abort(404)
-    return render_template("orders/orders.html", pedidos=pedido)
+    return render_template("orders/orders_details.html", pedido=pedido)
 
 @orders_bp.route("/pedidos/<int:pedido_id>/cancelar", methods=["POST"])
 def cancelar(pedido_id):
@@ -38,4 +38,4 @@ def cancelar(pedido_id):
         flash("Pedido cancelado.", "success")
     except OrderError as erro:
         flash(str(erro), "error")
-    return redirect(url_for("orders.detalhes"), pedido_id=pedido_id)
+    return redirect(url_for("orders.detalhes", pedido_id=pedido_id))

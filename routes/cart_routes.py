@@ -10,7 +10,7 @@ def _login_obrigatorio():
         return redirect(url_for("auth.login"))
     return None
 
-@cart_bp.route("/carrinho", methods=["POST"])
+@cart_bp.route("/carrinho")
 def ver_carrinho():
     redirecionar = _login_obrigatorio()
     if redirecionar:
@@ -19,13 +19,25 @@ def ver_carrinho():
     return render_template(
         "cart/cart.html", itens_carrinho=itens, subtotal=subtotal, taxa_entrega=taxa_entrega, total=total,)
 
+@cart_bp.route("/carrinho/adicionar", methods=["POST"])
+def adicionar():
+    redirecionar = _login_obrigatorio()
+    if redirecionar:
+        return redirecionar
+    try:
+        adicionar_ao_carrinho(g.user_atual.id, int(request.form.get("produto_id")), int(request.form.get("quantidade",1)))
+    except CartError as erro:
+        flash(str(erro),"error")
+    return redirect(url_for("cart.ver_carrinho"))
+    
+
 @cart_bp.route("/carrinho/atualizar", methods=["POST"])
 def atualizar():
     redirecionar = _login_obrigatorio()
     if redirecionar:
         return redirecionar
     try:
-        atualizar_item(int(request.fotm.get("item_id")), g.user_atual.id, int(request.form.get("quantidade")))
+        atualizar_item(int(request.form.get("item_id")), g.user_atual.id, int(request.form.get("quantidade",1)))
     except CartError as erro:
         flash(str(erro),"error")
     return redirect(url_for("cart.ver_carrinho"))
@@ -36,11 +48,11 @@ def remover():
     if redirecionar:
         return redirecionar
     remover_item(int(request.form.get("item_id")), g.user_atual.id)
-    flash("Item removido com sucesso.", "sucess")
+    flash("Item removido com sucesso.", "success")
     return redirect(url_for("cart.ver_carrinho"))
 
-@cart_bp.route("/logout", methods=["GET","POST"])
-def logout():
+@cart_bp.route("/checkout", methods=["GET","POST"])
+def checkout():
     redirecionar = _login_obrigatorio()
     if redirecionar:
         return redirecionar

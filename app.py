@@ -33,7 +33,7 @@ def create_app():
         cart_count = 0
         if g.user_atual.is_authenticated:
             cart_count = Cart.contar_itens(g.user_atual.id)
-        return {"Usuario Atual": g.user_atual, "Cart Count": cart_count}
+        return {"current_user": g.user_atual, "cart_count": cart_count}
 
     @app.route("/")
     def home():

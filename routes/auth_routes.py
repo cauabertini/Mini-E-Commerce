@@ -1,13 +1,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from services.auth_services import registrar_usuario, autenticar_usuario, AuthError
- 
+from services.auth_services import registrar_user, autenticar_user, AuthError
+
 auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/cadastro", methods=['GET','POST'])
 def cadastro():
     if request.method == "POST":
         try:
-            user = registrar_usuario(
+            user = registrar_user(
                 nome = request.form.get("nome"),
                 email = request.form.get("email"),
                 senha = request.form.get("senha"),
@@ -25,9 +25,9 @@ def cadastro():
 def login():
     if request.method == "POST":
         try:
-            user = autenticar_usuario(
+            user = autenticar_user(
                 email = request.form.get("email"),
-                senha = request.fotm.get("senha")
+                senha = request.form.get("senha")
             )
             session["user_id"] = user.id
             flash(f"Bem-vindo de volta, {user.nome.split(' ')[0]}!", "success")

@@ -16,11 +16,11 @@ def exigir_admin():
 @admin_bp.route("/dashboard")
 def dashboard():
     estatisticas = {
-        "vendas_hoje": Order.vendas_de_hoje(),
+        "vendas_hoje": Order.vendas_dia(),
         "variacao_vendas": 0,
         "pedidos_pendentes": Order.contar_pendentes(),
         "total_produtos": Product.contar_total(),
-        "estoque_baixo": Product.contar_estoque_baixo(),
+        "estoque_baixo": Product.contar_abaixo_estoque()
     }
     pedidos_recentes = Order.listar_recentes(5)
     return render_template("admin/dashboard.html", estatisticas=estatisticas, pedidos_recentes=pedidos_recentes)
@@ -46,7 +46,7 @@ def editar_produto(produto_id):
         abort(404)
     if request.method == "POST":
         dados = _dados_produto_do_form()
-        Product.atualizar(produto, dados)
+        Product.atualizar(produto_id, dados)
         flash("Produto atualizado com sucesso", "sucess")
         return redirect(url_for("admin.produtos"))
     return render_template("products/add_product.html", produto=produto)
@@ -59,14 +59,14 @@ def excluir(produto_id):
 
 @admin_bp.route("/pedidos")
 def pedidos():
-    status = request.form.get("status") or None
+    status = request.args.get("status") or None
     lista = Order.listar_todos(status=status)
     return render_template("admin/orders.html", pedidos=lista)
 
 @admin_bp.route("/pedidos/<int:pedido_id>/status", methods=["POST"])
 def status(pedido_id):
     try:
-        Order.atualizar_status(pedido_id, request.form.get("status"))
+        atualizar_status_pedido(pedido_id,request.args.get("status"))
         flash("Status do pedido atualizado com sucesso.", "sucess")
     except OrderError as erro:
         flash(str(erro), "error")

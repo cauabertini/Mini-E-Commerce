@@ -22,16 +22,16 @@ CREATE TABLE IF NOT EXISTS produtos (
     destaque INTEGER NOT NULL DEFAULT 0,
     desconto INTEGER,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+);
 
-CREATE TABLE IF NOT EXITS carrinho_itens (
+CREATE TABLE IF NOT EXISTS carrinho_itens (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     produto_id INTEGER NOT NULL,
     quantidade INTEGER NOT NULL DEFAULT 1,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
-)
+);
 
 CREATE TABLE IF NOT EXISTS pedidos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS pedidos (
     total REAL NOT NULL DEFAULT 0,
     endereco_entrega TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)
+);
 
 CREATE TABLE IF NOT EXISTS pedidos_itens (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,4 +53,4 @@ CREATE TABLE IF NOT EXISTS pedidos_itens (
     preco_unitario REAL NOT NULL,
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
     FOREIGN KEY (produto_id) REFERENCES produtos(id)
-)
+);
